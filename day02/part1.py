@@ -10,26 +10,8 @@ import support
 INPUT_TXT = os.path.join(os.path.dirname(__file__), 'input.txt')
 
 GAME = {
-  "A": {
-    "_": 1,
-    "X": 3,
-    "Y": 0,
-    "Z": 6,
-  },
-  "B": {
-    "_": 2,  # paper
-    "X": 6,
-    "Y": 3,
-    "Z": 0,
-  },
-  "C": {
-    "_": 3,  # scissor
-    "X": 0,
-    "Y": 6,
-    "Z": 3,
-  },
   "X": {
-    "_": 1,
+    "_": 1,  # rock
     "A": 3,
     "B": 0,
     "C": 6,
@@ -50,14 +32,13 @@ GAME = {
 
 
 def compute(s: str) -> int:
-    p1_score, p2_score = 0, 0
+    score = 0
     for game in s.split("\n"):
         if not game:
             continue
-        p1, p2 = game.split()
-        p1_score += GAME[p1]["_"] + GAME[p1][p2]
-        p2_score += GAME[p2]["_"] + GAME[p2][p1]
-    return p2_score
+        opponent, you = game.split()
+        score += GAME[you]["_"] + GAME[you][opponent]
+    return score
 
 
 INPUT_S = '''\
