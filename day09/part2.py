@@ -24,17 +24,10 @@ MV_HEAD = {
     "U": lambda pos: Pos(pos.x, pos.y + 1),
 }
 
-MV_TAIL = {
-    "D": lambda head, tail: Pos(head.x, head.y + 1) if tail.y - head.y > 1 else tail,
-    "L": lambda head, tail: Pos(head.x + 1, head.y) if tail.x - head.x > 1 else tail,
-    "R": lambda head, tail: Pos(head.x - 1, head.y) if head.x - tail.x > 1 else tail,
-    "U": lambda head, tail: Pos(head.x, head.y - 1) if head.y - tail.y > 1 else tail,
-}
-
 
 def compute(s: str) -> int:
     lines = [line for line in s.split("\n") if line]
-    rope = [Pos(512, 512) for _ in range(10)]
+    rope = [Pos(0, 0) for _ in range(10)]
     grid = [[0 for _ in range(1024)] for _ in range(1024)]
     for line in lines:
         direction, dist = line.split()
@@ -43,19 +36,29 @@ def compute(s: str) -> int:
             for i, knot in enumerate(rope):
                 if i == 0:
                     pos = MV_HEAD[direction](knot)
+                    knot.x, knot.y = pos.x, pos.y
                 else:
                     prev = rope[i - 1]
-                    pull = (
-                        "R"
-                        if prev.x - knot.x > 1
-                        else "D"
-                        if knot.y - prev.y > 1
-                        else "L"
-                        if knot.x - prev.x > 1
-                        else "U"
-                    )
-                    pos = MV_TAIL[pull](prev, knot)
-                knot.x, knot.y = pos.x, pos.y
+                    x_dist = prev.x - knot.x
+                    y_dist = prev.y - knot.y
+                    if x_dist > 1:  # Right
+                        knot.x += 1
+                        if y_dist != 0:
+                            knot.y += 1 if y_dist > 0 else -1
+                    elif x_dist < -1:  # Left
+                        knot.x -= 1
+                        if y_dist != 0:
+                            knot.y += 1 if y_dist > 0 else -1
+                    elif y_dist > 1:  # Up
+                        knot.y += 1
+                        if x_dist != 0:
+                            knot.x += 1 if x_dist > 0 else -1
+                    elif y_dist < -1:  # Down
+                        knot.y -= 1
+                        if x_dist != 0:
+                            knot.x += 1 if x_dist > 0 else -1
+                    else:
+                        break
             grid[rope[-1].x][rope[-1].y] = 1
     n_visited = sum([sum(grid[i]) for i in range(len(grid))])
     return n_visited
